@@ -209,6 +209,9 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 .mk button.pm{width:44px;padding:0}
 #go{background:var(--ok);color:#fff;margin-left:.4em}
 #go:disabled{opacity:.4}
+#modeRow.lock .seg{opacity:.35;pointer-events:none}
+#modeNote{color:#3b6fd1;font-size:.85em}
+#modeNote[hidden]{display:none}
 #mkNote{color:#b0452f;font-size:.85em;min-height:1.2em}
 #close{align-self:flex-end;padding:.5em 1.4em;border-radius:999px;background:var(--ink);color:#fff;font-weight:700;min-height:44px}
 
@@ -254,10 +257,11 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 
 <div id="sheet" hidden><div class="card">
   <h2>10을 이용해 빼기</h2>
-  <div class="row"><b>빼는 방법</b><div class="seg" data-k="mode">
-    <button data-v="free">스스로 고르기</button><button data-v="A">빼는 수 가르기</button><button data-v="B">빼지는 수 가르기</button><button data-v="alt">번갈아</button></div></div>
   <div class="row"><b>문제 종류</b><div class="seg" data-k="kind">
     <button data-v="borrow">받아내림 (14−9)</button><button data-v="warm">낱개 빼기 (14−4)</button><button data-v="mix">섞어서</button></div></div>
+  <div class="row" id="modeRow"><b>빼는 방법</b><div class="seg" data-k="mode">
+    <button data-v="free">스스로 고르기</button><button data-v="A">빼는 수 가르기</button><button data-v="B">빼지는 수 가르기</button><button data-v="alt">번갈아</button></div>
+    <div id="modeNote" hidden>낱개 빼기는 빼지는 수 가르기(14를 10과 4로 가르기)로만 풀어요.</div></div>
   <div class="row"><b>빼는 수</b><div class="seg" data-k="sub">
     <button data-v="all">아무 수</button><button data-v="9">9</button><button data-v="8">8</button><button data-v="7">7</button><button data-v="6">6</button><button data-v="5">5</button></div></div>
   <div class="row"><b>문제 직접 내기</b>
@@ -383,7 +387,9 @@ const setTxt = (box, t) => { box.querySelector('.txt').textContent = t; };
 function render(flip = true){
   $('#starN').textContent = S.stars;
   // 방법이 고정된 모드일 때 위에 표시 (누르면 설정 열기)
-  const MODE = {A:['빼는 수 가르기 모드','빼는 수'], B:['빼지는 수 가르기 모드','빼지는 수'], alt:['번갈아 모드','번갈아']}[S.set.mode];
+  // 낱개 빼기 문제(14−4)는 언제나 빼지는 수 가르기
+  const MODE = (isWarm() && (S.set.mode !== 'free' || S.set.kind === 'warm')) ? ['빼지는 수 가르기 모드','빼지는 수']
+    : {A:['빼는 수 가르기 모드','빼는 수'], B:['빼지는 수 가르기 모드','빼지는 수'], alt:['번갈아 모드','번갈아']}[S.set.mode];
   const chip = $('#modeChip'); chip.hidden = !MODE;
   if (MODE) chip.innerHTML = `<span class="full">${MODE[0]}</span><span class="short">${MODE[1]}</span>`;
   renderCubes(flip); renderDia(); renderEq(); renderMsg();
@@ -930,6 +936,10 @@ let ca = 14, cb = 9;
 const validPair = (a, b) => a - b >= 1 && a - b <= 10 && b >= a - 10;
 function syncSheet(){
   document.querySelectorAll('.seg').forEach(g => g.querySelectorAll('button').forEach(b => b.classList.toggle('sel', b.dataset.v == S.set[g.dataset.k])));
+  // 낱개 빼기만 고르면 빼는 방법은 '빼지는 수 가르기'로 고정 (줄 잠그기)
+  const lock = S.set.kind === 'warm';
+  $('#modeRow').classList.toggle('lock', lock); $('#modeNote').hidden = !lock;
+  if (lock) $('#modeRow').querySelectorAll('button').forEach(b => b.classList.toggle('sel', b.dataset.v === 'B'));
   $('#ca').textContent = ca; $('#cb').textContent = cb;
   const ok = validPair(ca, cb);
   $('#go').disabled = !ok;

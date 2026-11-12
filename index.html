@@ -604,7 +604,8 @@ async function removeTo(kind, n){
   const need = n - gone(kind), g = gen; if (need <= 0) return;
   const live = cubes.filter(c => c.kind === kind && !c.gone);
   const pick = live.slice(-need);   // 오른쪽 끝부터
-  const els = pick.map(c => frame.querySelector(`.cube[data-id="${c.id}"]`));
+  // 오른쪽 끝 블록부터 왼쪽으로 하나씩 (실제 연결모형처럼 끝에서 떼어 내기, 거꾸로 세기 방향)
+  const els = pick.map(c => frame.querySelector(`.cube[data-id="${c.id}"]`)).reverse();
   const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
   for (let k = 0; k < els.length; k++) {   // 하나씩 천천히 빗금 치기 (아이들이 셀 수 있게)
     if (g !== gen) return;

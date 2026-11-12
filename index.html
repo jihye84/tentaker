@@ -134,7 +134,7 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 @keyframes hop{50%{transform:translate(-50%,-58%)}}
 .lab{position:absolute;transform:translate(-50%,-50%);font-weight:800;line-height:1;white-space:nowrap;z-index:2;transition:opacity .3s}
 #t10{font-size:12cqw}
-#tX{font-size:6.8cqw}
+#tX{font-size:6.4cqw}
 .box{display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink);position:relative;
   background:#fff;border:3px solid var(--box);border-radius:1.6cqw}
 .box .txt{position:relative;z-index:1}
@@ -446,7 +446,7 @@ function renderDia(){
   const nA = $('#nA'), nB = $('#nB'), bP = $('#bP'), bQ = $('#bQ'), t10 = $('#t10'), tX = $('#tX'), hl = $('#hl');
   // 빼지는 수 가르기는 '10 − 9 = □'를 10의 왼쪽에 두려고 식 전체를 오른쪽으로 옮겨요
   const XB = S.m === 'B';
-  P(nA, XB ? 312 : 150, 64); P($('#nM'), XB ? 390 : 248, 64); P(nB, XB ? 460 : 335, 64);
+  P(nA, XB ? 324 : 150, 64); P($('#nM'), XB ? 401 : 248, 64); P(nB, XB ? 468 : 335, 64);
   nA.textContent = S.a; nB.textContent = S.b;
   const ch = S.step === 'choose' && !isWarm();
   nA.classList.toggle('pick', ch); nB.classList.toggle('pick', ch);
@@ -462,14 +462,14 @@ function renderDia(){
     P(t10, 85, 215); P(bP, 205, 215); svg = arrow(150, 100, 98, 172) + arrow(150, 100, 195, 170);
     t10.classList.remove('hide'); bP.classList.remove('hide'); bP.classList.add('pk');
   } else if (m === 'B') {
-    P(t10, 280, 215); P(bP, 380, 215); svg = arrow(312, 100, 290, 172) + arrow(312, 100, 370, 170);
-    P(hl, 460, 64); hl.classList.add('on');
-    tX.textContent = `10 − ${S.b} =`; P(tX, 64, 215); P(bQ, 180, 215);
+    P(t10, 298, 215); P(bP, 392, 215); svg = arrow(324, 100, 306, 172) + arrow(324, 100, 382, 170);
+    P(hl, 468, 64); hl.classList.add('on');
+    tX.textContent = `10 − ${S.b} =`; P(tX, 58, 215); P(bQ, 172, 215);
     t10.classList.remove('hide'); bP.classList.remove('hide');
-    // 10 − 9 = □ 는 0.5초 늦게 나타나기
+    // 10 − 9 = □ 는 1초 늦게 나타나기
     const wasHidden = tX.dataset.shown !== '1';
     tX.classList.remove('hide'); bQ.classList.remove('hide');
-    if (wasHidden && !reduce) [tX, bQ].forEach(e => e.animate([{opacity:0}, {opacity:1}], {duration:400, delay:500, fill:'backwards'}));
+    if (wasHidden && !reduce) [tX, bQ].forEach(e => e.animate([{opacity:0}, {opacity:1}], {duration:400, delay:1000, fill:'backwards'}));
   }
   tX.dataset.shown = m === 'B' ? '1' : '';
   $('#arrows').innerHTML = svg;

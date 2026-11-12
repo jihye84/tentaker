@@ -117,15 +117,16 @@ button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
 #diaWrap{flex:1.35;min-width:0;container-type:size;display:grid;place-items:center}
 #dia{position:relative;width:min(100cqw,calc(100cqh * 5 / 3));aspect-ratio:5/3;container-type:inline-size}
 #arrows{position:absolute;inset:0;width:100%;height:100%;overflow:visible;z-index:1}
-#hl{position:absolute;transform:translate(-50%,-50%);width:15cqw;height:15cqw;border-radius:50%;background:var(--pink);opacity:0;transition:opacity .4s;z-index:0}
+#hl{position:absolute;transform:translate(-50%,-50%);width:13.5cqw;height:13.5cqw;border-radius:50%;background:var(--pink);opacity:0;transition:opacity .4s;z-index:0}
 #hl.on{opacity:1}
+#hl,.num,#arrows line,#arrows polyline{transition:opacity .4s,left .5s ease,top .5s ease}
 .num{position:absolute;transform:translate(-50%,-50%);font-weight:800;font-size:14cqw;line-height:1;z-index:2;border-radius:3cqw;padding:0 1.5cqw;white-space:nowrap}
 .num.pick{cursor:pointer;animation:hop 1.3s ease-in-out infinite;background:#fff;box-shadow:0 0 0 .6cqw var(--colInk)}
 #nB.pick{animation-delay:.65s}
 @keyframes hop{50%{transform:translate(-50%,-58%)}}
 .lab{position:absolute;transform:translate(-50%,-50%);font-weight:800;line-height:1;white-space:nowrap;z-index:2;transition:opacity .3s}
 #t10{font-size:12cqw}
-#tX{font-size:8.5cqw}
+#tX{font-size:6.8cqw}
 .box{display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ink);position:relative;
   background:#fff;border:3px solid var(--box);border-radius:1.6cqw}
 .box .txt{position:relative;z-index:1}
@@ -428,7 +429,9 @@ function stepVal(i){   // i번째 단계 칸에 보일 값
 }
 function renderDia(){
   const nA = $('#nA'), nB = $('#nB'), bP = $('#bP'), bQ = $('#bQ'), t10 = $('#t10'), tX = $('#tX'), hl = $('#hl');
-  P(nA,150,64); P($('#nM'),248,64); P(nB,335,64);
+  // 빼지는 수 가르기는 '10 − 9 = □'를 10의 왼쪽에 두려고 식 전체를 오른쪽으로 옮겨요
+  const XB = S.m === 'B';
+  P(nA, XB ? 312 : 150, 64); P($('#nM'), XB ? 390 : 248, 64); P(nB, XB ? 460 : 335, 64);
   nA.textContent = S.a; nB.textContent = S.b;
   const ch = S.step === 'choose' && !isWarm();
   nA.classList.toggle('pick', ch); nB.classList.toggle('pick', ch);
@@ -440,15 +443,20 @@ function renderDia(){
     P(bP, 270, 215); P(bQ, 400, 215); bP.classList.add('pk'); bQ.classList.add('mt');
     svg = arrow(335, 100, 280, 170) + arrow(335, 100, 390, 170);
     bP.classList.remove('hide'); bQ.classList.remove('hide');
-  } else if (m === 'B' || m === 'W') {
+  } else if (m === 'W') {
     P(t10, 85, 215); P(bP, 205, 215); svg = arrow(150, 100, 98, 172) + arrow(150, 100, 195, 170);
+    t10.classList.remove('hide'); bP.classList.remove('hide'); bP.classList.add('pk');
+  } else if (m === 'B') {
+    P(t10, 280, 215); P(bP, 380, 215); svg = arrow(312, 100, 290, 172) + arrow(312, 100, 370, 170);
+    P(hl, 460, 64); hl.classList.add('on');
+    tX.textContent = `10 − ${S.b} =`; P(tX, 64, 215); P(bQ, 180, 215);
     t10.classList.remove('hide'); bP.classList.remove('hide');
-    if (m === 'B') {
-      P(hl, 335, 64); hl.classList.add('on');
-      tX.textContent = `10 − ${S.b} =`; P(tX, 345, 215); P(bQ, 455, 215);
-      tX.classList.remove('hide'); bQ.classList.remove('hide');
-    } else bP.classList.add('pk');
+    // 10 − 9 = □ 는 0.5초 늦게 나타나기
+    const wasHidden = tX.dataset.shown !== '1';
+    tX.classList.remove('hide'); bQ.classList.remove('hide');
+    if (wasHidden && !reduce) [tX, bQ].forEach(e => e.animate([{opacity:0}, {opacity:1}], {duration:400, delay:500, fill:'backwards'}));
   }
+  tX.dataset.shown = m === 'B' ? '1' : '';
   $('#arrows').innerHTML = svg;
   const steps = m ? STEPS() : [];
   [bP, bQ].forEach(box => {

@@ -568,7 +568,7 @@ async function check(){
   // 빼는 수 가르기 첫 칸: 4를 1과 3처럼 '맞게 갈랐지만 순서가 다른' 답은 틀림으로 치지 않고 부드럽게 안내
   const v = +S.input;
   if (S.m === 'A' && S.si === 0 && v >= 1 && v < S.b && v !== c.want) {
-    busy = true; sound(3);
+    busy = true; sound(5);
     setTimeout(() => {
       S.input = ''; S.hint = true; busy = false;   // S.wrong은 그대로 (틀린 횟수에 넣지 않음)
       note(`${eun(S.b)} ${wa(v)} ${ro(S.b - v)}도 가를 수 있어요. 그런데 낱개 ${ones()}개를 먼저 모두 빼야 10이 남아요.`, 5000);
@@ -858,6 +858,20 @@ function sound(kind){
   try {
     ac = ac || new (window.AudioContext || window.webkitAudioContext)();
     const now = ac.currentTime;
+    if (kind === 5) {   // "인정해! 그런데 다시 해 볼래?" — 따뜻한 두 음(응, 맞아) + 묻는 듯 올라가는 소리(…볼래?)
+      const tone = (f0, f1, t, len, type, v) => {
+        const o = ac.createOscillator(), g = ac.createGain();
+        o.type = type; o.frequency.setValueAtTime(f0, now + t);
+        if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, now + t + len * .8);
+        g.gain.setValueAtTime(0, now + t); g.gain.linearRampToValueAtTime(v, now + t + .02);
+        g.gain.exponentialRampToValueAtTime(.001, now + t + len);
+        o.connect(g).connect(ac.destination); o.start(now + t); o.stop(now + t + len + .05);
+      };
+      tone(523, 523, 0, .3, 'sine', .2);          // 도
+      tone(659, 659, .13, .34, 'sine', .2);       // 미  → "응, 맞아"
+      tone(587, 880, .52, .32, 'triangle', .16);  // 레→라 미끄러져 올라가기 → "…해 볼래?"
+      return;
+    }
     const seq = {0:[[262,0],[247,.13]], 1:[[784,0],[1047,.09]], 2:[[784,0],[988,.1],[1175,.2],[1568,.32]], 3:[[660,0]], 4:[[1320,0]]}[kind];
     seq.forEach(([f, t]) => {
       const o = ac.createOscillator(), g = ac.createGain();

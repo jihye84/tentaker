@@ -380,7 +380,9 @@ function renderCubes(flip){
   if (flip && !reduce) frame.querySelectorAll('.cube').forEach(e => before[e.dataset.id] = e.getBoundingClientRect());
   frame.innerHTML = '';
   const cnt = document.createElement('div'); cnt.className = 'cnt';
-  cnt.textContent = cubes.filter(c => !c.gone).length; frame.appendChild(cnt);
+  // 처음 수(14)만 보여 주고, 블록을 빼기 시작하면 숨겨요 (남은 개수 = 답이니까)
+  cnt.textContent = S.a; if (cubes.some(c => c.gone)) cnt.style.visibility = 'hidden';
+  frame.appendChild(cnt);
   const bar = document.createElement('div'), loose = document.createElement('div');
   bar.className = 'grp bar'; loose.className = 'grp loose';
   const c = cur(), blinkKind = S.hint && c ? c.blink : null;
